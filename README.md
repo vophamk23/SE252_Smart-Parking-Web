@@ -1,16 +1,74 @@
-# React + Vite
+# BK Parking - Hệ thống Bãi đỗ xe Thông minh
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dự án Hệ thống Bãi đỗ xe Thông minh (Smart Parking Web Application) được phát triển nhằm tự động hóa quy trình quản lý bãi đỗ xe tại Đại học Bách Khoa TP.HCM (HCMUT). Hệ thống bao gồm đầy đủ các luồng xử lý từ lúc xe vào/ra cổng, ghi nhận nợ tự động, đến thanh toán trực tuyến qua ví nội bộ BKPay.
 
-Currently, two official plugins are available:
+## 🌟 Các tính năng chính (Core Features)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. **Quản lý Cổng (Gate Entry/Exit)**:
+   - Nhận diện xe vào/ra bằng thẻ từ và mô phỏng nhận diện biển số (ALPR).
+   - Hỗ trợ cả sinh viên/nhân viên (Member) và khách vãng lai (Guest Ticket).
+   - Xử lý mượt mà kịch bản ghi nợ tự động nếu tài khoản không đủ số dư.
+   - Hỗ trợ chế độ hoạt động Ngoại tuyến (Offline mode).
 
-## React Compiler
+2. **Cổng thanh toán BKPay**:
+   - Tích hợp ví điện tử nội bộ cho phép nạp tiền và thanh toán nợ gửi xe chỉ với một chạm.
+   - Quản lý lịch sử giao dịch và biên lai.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. **Dashboard & Quản trị (Admin/Staff)**:
+   - Theo dõi doanh thu, số lượng xe đang đỗ, tỷ lệ lấp đầy theo thời gian thực.
+   - Sơ đồ bãi xe trực quan (Live Parking Map).
+   - Quản lý người dùng, thẻ định danh và thiết bị IoT (Camera, Barrier, Bảng LED).
 
-## Expanding the ESLint configuration
+## 🚀 Hướng dẫn Cài đặt & Chạy dự án (Local Development)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Yêu cầu hệ thống:
+- [Node.js](https://nodejs.org/en/) (phiên bản 18.x hoặc mới hơn).
+- [Git](https://git-scm.com/) (để clone dự án - tùy chọn).
+
+### Các bước khởi chạy:
+
+**Bước 1:** Tải mã nguồn về máy và mở Terminal tại thư mục gốc của dự án (`SE252_Smart-Parking-Web`).
+
+**Bước 2:** Cài đặt thư viện cho cả Frontend và Backend.
+```bash
+# Cài đặt thư viện cho Frontend (Gốc)
+npm install
+
+# Cài đặt thư viện cho Backend
+cd backend
+npm install
+cd ..
+```
+
+**Bước 3:** Khởi chạy toàn bộ hệ thống bằng một lệnh duy nhất.
+```bash
+npm run dev:all
+```
+*Lệnh này sẽ dùng `concurrently` để chạy song song Frontend (Vite) tại `http://localhost:3000` và Backend (Express) tại `http://localhost:5000`.*
+
+---
+
+## 🔑 Tài khoản dùng thử (Test Accounts)
+
+Hệ thống cung cấp sẵn các tài khoản sau để bạn test các phân quyền (Role) khác nhau.
+
+| Vai trò | Email đăng nhập | Mật khẩu | Ghi chú |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@hcmut.edu.vn` | `admin123` | Quản trị viên (Full quyền) |
+| **Staff** | `staff@hcmut.edu.vn` | `staff123` | Bảo vệ cổng, check-in/out |
+| **User** | `user@hcmut.edu.vn` | `user123` | Sinh viên chính quy (Có xe) |
+| **User** | `user06@hcmut.edu.vn` | `user123` | Giảng viên |
+
+## 📦 Hướng dẫn Đóng gói (Deploy / Nộp bài)
+Khi cần mang project đi báo cáo hoặc nén lại để nộp bài:
+1. Bạn hãy **XÓA** thư mục `node_modules` ở ngoài cùng và `node_modules` bên trong thư mục `backend/` (để file nén nhẹ hơn, tránh bị nặng hàng trăm MB).
+2. Nén toàn bộ thư mục `SE252_Smart-Parking-Web` thành file `.zip`.
+3. Khi người khác giải nén, họ chỉ cần làm theo **Các bước khởi chạy** (chạy `npm install` lại) là hệ thống sẽ hoạt động bình thường!
+
+## 🛠 Công nghệ sử dụng
+- **Frontend**: React 19, Vite, Tailwind CSS, React Router.
+- **Backend**: Node.js, Express.js.
+- **Database**: In-memory JSON (Mô phỏng dữ liệu qua file `db.js`).
+
+---
+*Phát triển cho đồ án môn học kỹ thuật phần mềm - Smart Parking System.*

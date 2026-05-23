@@ -1,35 +1,36 @@
-const users = require('../data/users');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+// backend/services/auth.service.js
 
-const JWT_SECRET = 'your-secret-key'; // In real app, use env var
+const db = require('../data/db')
+const jwt = require('jsonwebtoken')
+const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/env.config')
 
 class AuthService {
   async login(email, password) {
-    const user = users.find(u => u.email === email);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = db.users[email]
+    if (!user) throw new Error('Email không tồn tại')
+    if (user.password !== password) throw new Error('Sai mật khẩu')
 
-    // For mock, compare plain text. In real, use bcrypt.compare
-    if (password !== user.password) {
-      throw new Error('Invalid password');
-    }
+    const payload = { email: user.email, role: user.role, name: user.name }
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 
-    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    return { user: { id: user.id, email: user.email, role: user.role, name: user.name }, token };
+    return {
+      token,
+      user: { email: user.email, name: user.name, role: user.role, title: user.title, card: user.card, vehicle: user.vehicle },
+    }
   }
 
   async getCurrentUser(token) {
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const user = users.find(u => u.id === decoded.id);
-      if (!user) throw new Error('User not found');
-      return { id: user.id, email: user.email, role: user.role, name: user.name };
-    } catch (error) {
-      throw new Error('Invalid token');
-    }
+    const decoded = jwt.verify(token, JWT_SECRET)
+    const user = db.users[decoded.email]
+    if (!user) throw new Error('User không tồn tại')
+    const { password, ...safeUser } = user
+    return safeUser
+  }
+
+  async logout() {
+    // JWT là stateless — client tự xóa token
+    return { success: true }
   }
 }
 
-module.exports = new AuthService();
+module.exports = new AuthService()

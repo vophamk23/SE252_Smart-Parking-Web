@@ -1,10 +1,17 @@
+// backend/controllers/email.controller.js
+// Gửi email xác nhận thanh toán qua Nodemailer
+// Secrets được đọc từ .env, KHÔNG hard-code trong code
+
 const nodemailer = require('nodemailer')
+const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS } = require('../config/env.config')
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: EMAIL_HOST,
+  port: Number(EMAIL_PORT),
+  secure: false,
   auth: {
-    user: 'duongtranminh253@gmail.com',
-    pass: 'bvfb lrxh reke sstu',
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
   },
 })
 
@@ -12,10 +19,15 @@ exports.sendPaymentConfirmation = async (req, res) => {
   const { sessionId, amount, plate, zone, entryTime, exitTime, duration, userName, userEmail } = req.body
 
   if (!sessionId || !amount) {
-    return res.status(400).json({ success: false, error: 'Missing required fields' })
+    return res.status(400).json({ success: false, error: 'Thiếu sessionId hoặc amount' })
   }
 
-  const recipient = 'duong.tran253@hcmut.edu.vn'
+  const paymentService = require('../services/payment.service')
+  // Gửi đến contactEmail của user, fallback sang userEmail
+  const recipient = paymentService.getContactEmail(userEmail || userName) || EMAIL_USER
+  if (!recipient) {
+    return res.status(400).json({ success: false, error: 'Không có địa chỉ email nhận' })
+  }
 
   const html = `
 <!DOCTYPE html>
@@ -30,40 +42,37 @@ exports.sendPaymentConfirmation = async (req, res) => {
     </div>
 
     <div style="padding:28px 32px;">
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
-        <span style="font-size:28px;">✅</span>
-        <div>
-          <p style="margin:0;font-size:15px;font-weight:700;color:#166534;">Thanh toán thành công!</p>
-          <p style="margin:4px 0 0;font-size:13px;color:#15803d;">Giao dịch đã được ghi nhận và xử lý.</p>
-        </div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+        <p style="margin:0;font-size:15px;font-weight:700;color:#166534;">✅ Thanh toán thành công!</p>
+        <p style="margin:4px 0 0;font-size:13px;color:#15803d;">Giao dịch đã được ghi nhận và xử lý.</p>
       </div>
 
       <h3 style="margin:0 0 12px;font-size:14px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;">Chi tiết giao dịch</h3>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Mã giao dịch</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Mã giao dịch</td>
           <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:700;text-align:right;font-family:monospace;">${sessionId}</td>
         </tr>
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Biển số xe</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Biển số xe</td>
           <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:700;text-align:right;">${plate || '---'}</td>
         </tr>
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Khu vực</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Khu vực</td>
           <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:700;text-align:right;">${zone || '---'}</td>
         </tr>
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Thời gian vào</td>
-          <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:600;text-align:right;">${entryTime || '---'}</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Thời gian vào</td>
+          <td style="padding:10px 0;font-size:14px;color:#0f172a;text-align:right;">${entryTime || '---'}</td>
         </tr>
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Thời gian ra</td>
-          <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:600;text-align:right;">${exitTime || '---'}</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Thời gian ra</td>
+          <td style="padding:10px 0;font-size:14px;color:#0f172a;text-align:right;">${exitTime || '---'}</td>
         </tr>
         <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:10px 0;font-size:14px;color:#64748b;font-weight:500;">Thời gian gửi</td>
-          <td style="padding:10px 0;font-size:14px;color:#0f172a;font-weight:600;text-align:right;">${duration || '---'}</td>
+          <td style="padding:10px 0;font-size:14px;color:#64748b;">Thời gian gửi</td>
+          <td style="padding:10px 0;font-size:14px;color:#0f172a;text-align:right;">${duration || '---'}</td>
         </tr>
         <tr>
           <td style="padding:14px 0 0;font-size:16px;color:#0f172a;font-weight:800;">TỔNG THANH TOÁN</td>
@@ -78,8 +87,7 @@ exports.sendPaymentConfirmation = async (req, res) => {
       </div>
 
       <p style="font-size:13px;color:#94a3b8;text-align:center;margin:0;">
-        Email này được gửi tự động từ hệ thống BKParking HCMUT.<br>
-        Vui lòng không trả lời email này.
+        Email này được gửi tự động từ hệ thống BKParking HCMUT.<br>Vui lòng không trả lời email này.
       </p>
     </div>
 
@@ -92,13 +100,13 @@ exports.sendPaymentConfirmation = async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: '"BKParking HCMUT" <duongtranminh253@gmail.com>',
+      from: `"BKParking HCMUT" <${EMAIL_USER}>`,
       to: recipient,
       subject: `[BKParking] Xác nhận thanh toán ${sessionId} - ${Number(amount).toLocaleString('vi-VN')} đ`,
       html,
     })
 
-    return res.json({ success: true, message: 'Email sent successfully', to: recipient })
+    return res.json({ success: true, message: 'Email đã được gửi', to: recipient })
   } catch (err) {
     console.error('Email send error:', err)
     return res.status(500).json({ success: false, error: err.message })
