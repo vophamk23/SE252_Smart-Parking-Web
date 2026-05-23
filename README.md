@@ -65,4 +65,4 @@ Hệ thống cung cấp sẵn các tài khoản sau để bạn test các phân 
 - **Database**: In-memory JSON (Mô phỏng dữ liệu qua file `db.js`).
 
 ---
-*Phát triển cho đồ án môn học kỹ thuật phần mềm - Smart Parking System.*
+*Phát triển cho đồ án môn học Công ngệ Phần mềm - Smart Parking System.*
