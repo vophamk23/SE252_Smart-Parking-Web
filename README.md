@@ -59,12 +59,6 @@ Hệ thống cung cấp sẵn các tài khoản sau để bạn test các phân 
 | **User** | `user@hcmut.edu.vn` | `user123` | Sinh viên chính quy (Có xe) |
 | **User** | `user06@hcmut.edu.vn` | `user123` | Giảng viên |
 
-## 📦 Hướng dẫn Đóng gói (Deploy / Nộp bài)
-Khi cần mang project đi báo cáo hoặc nén lại để nộp bài:
-1. Bạn hãy **XÓA** thư mục `node_modules` ở ngoài cùng và `node_modules` bên trong thư mục `backend/` (để file nén nhẹ hơn, tránh bị nặng hàng trăm MB).
-2. Nén toàn bộ thư mục `SE252_Smart-Parking-Web` thành file `.zip`.
-3. Khi người khác giải nén, họ chỉ cần làm theo **Các bước khởi chạy** (chạy `npm install` lại) là hệ thống sẽ hoạt động bình thường!
-
 ## 🛠 Công nghệ sử dụng
 - **Frontend**: React 19, Vite, Tailwind CSS, React Router.
 - **Backend**: Node.js, Express.js.
